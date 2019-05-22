@@ -55,7 +55,7 @@ libserial.clean: .FORCE
 
 robustserial: robustserial.clean
 	mkdir -p $(ROBUSTSERIAL.BUILD)
-	cd $(ROBUSTSERIAL.BUILD) && $(CMAKE.BIN) $(ROBUSTSERIAL.SOURCE) && make -j$(J) install
+	cd $(ROBUSTSERIAL.BUILD) && $(CMAKE.BIN) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) $(ROBUSTSERIAL.SOURCE) && make -j$(J) install
 
 robustserial.clean: .FORCE
 	rm -rf $(ROBUSTSERIAL.BUILD)
@@ -102,13 +102,13 @@ cmake.clean: .FORCE
 	rm -rf $(CMAKE.DIR)
 
 
-clean: cmake.clean tests.clean
+clean: cmake.clean
 	rm -rf $(INSTALLED.HOST.DIR)
 	rm -rf $(DOWNLOADS.DIR)
 	rm -rf $(PACKAGE.DIR)
 	rm -f $(BASE.DIR)/tags
 
-ci: bootstrap robustserial
+ci: bootstrap robustserial examples
 
 .FORCE:
 

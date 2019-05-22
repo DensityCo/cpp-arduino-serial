@@ -20,12 +20,14 @@ set(CMAKE_C_FLAGS_RELEASE   "-O0")
 add_definitions(-DYY_NO_INPUT=1)
 
 set(LIB_ROBUSTSERIAL_SOURCES  robust_serial.cpp)
-set(LIB_ROBUSTSERIAL_HEADERS  robust_serial.h) 
+set(LIB_ROBUSTSERIAL_HEADERS  robust_serial.hpp) 
 
 set(PROJECT_SOURCE_FILES ${LIB_ROBUSTSERIAL_SOURCES})
+include_directories(${CMAKE_PREFIX_PATH}/include)
+include_directories(${CMAKE_PREFIX_PATH}/include/libserial)
 
-target_link_libraries(robustserial serial)
 add_library(robustserial ${LIB_ROBUSTSERIAL_SOURCES} ${LIB_ROBUSTSERIAL_HEADERS})
+target_link_libraries(robustserial serial)
 
 install(TARGETS robustserial DESTINATION lib)
 install(FILES ${LIB_ROBUSTSERIAL_HEADERS} DESTINATION include/robustserial)

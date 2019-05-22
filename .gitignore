@@ -6,3 +6,4 @@ bin/
 downloads
 installed.host
 build.robustserial
+build.examples
