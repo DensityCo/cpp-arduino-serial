@@ -2,3 +2,7 @@ build/
 bin/
 *.x
 *.log
+*.swp
+downloads
+installed.host
+build.robustserial
