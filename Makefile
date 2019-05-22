@@ -21,6 +21,22 @@ TESTS.DIR=$(BASE.DIR)/tests
 TESTS.BIN=$(INSTALLED.HOST.DIR)/bin/test
 ROBUSTSERIAL.BUILD=$(BASE.DIR)/build.robustserial
 ROBUSTSERIAL.SOURCE=$(BASE.DIR)/src
+LIBSERIAL.VERSION=1.0.0
+LIBSERIAL.ARCHIVE=v$(LIBSERIAL.VERSION).tar.gz
+LIBSERIAL.URL=https://github.com/crayzeewulf/libserial/archive/$(LIBSERIAL.ARCHIVE)
+LIBSERIAL.DIR=$(DOWNLOADS.DIR)/libserial-$(LIBSERIAL.VERSION)
+LIBSERIAL.BUILD=$(DOWNLOADS.DIR)/build.libserial
+
+libserial: libserial.clean
+	mkdir -p $(DOWNLOADS.DIR)
+	cd $(DOWNLOADS.DIR) && wget $(LIBSERIAL.URL) && tar xf $(LIBSERIAL.ARCHIVE)
+	mkdir -p $(LIBSERIAL.BUILD)
+	cd $(LIBSERIAL.BUILD) && $(CMAKE.BIN) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) $(LIBSERIAL.DIR) && make -j$(J) install
+
+libserial.clean: .FORCE
+	rm -rf $(LIBSERIAL.BUILD)
+	rm -rf $(LIBSERIAL.DIR)
+	rm -f $(LIBSERIAL.ARCHIVE)
 
 robustserial: robustserial.clean
 	mkdir -p $(ROBUSTSERIAL.BUILD)
