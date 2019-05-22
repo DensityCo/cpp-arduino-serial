@@ -7,9 +7,10 @@ PACKAGE.DIR=$(BASE.DIR)/package
 DOWNLOADS.DIR=$(BASE.DIR)/downloads
 INSTALLED.HOST.DIR=$(BASE.DIR)/installed.host
 INSTALLED.TARGET.DIR=$(BASE.DIR)/installed.target
-CMAKE.URL=https://s3.amazonaws.com/buildroot-sources/cmake-3.10.2.tar.gz
-CMAKE.DIR=$(DOWNLOADS.DIR)/cmake-3.10.2
-CMAKE.ARCHIVE=$(DOWNLOADS.DIR)/cmake-3.10.2.tar.gz
+CMAKE.VERSION=3.14.4
+CMAKE.ARCHIVE=cmake-$(CMAKE.VERSION).tar.gz
+CMAKE.URL=https://github.com/Kitware/CMake/releases/download/v$(CMAKE.VERSION)/$(CMAKE.ARCHIVE)
+CMAKE.DIR=$(DOWNLOADS.DIR)/cmake-$(CMAKE.VERSION)
 CMAKE.BIN=$(INSTALLED.HOST.DIR)/bin/cmake
 GTEST.VERSION=1.8.1
 GTEST.ARCHIVE=release-$(GTEST.VERSION).tar.gz
@@ -26,9 +27,11 @@ LIBSERIAL.ARCHIVE=v$(LIBSERIAL.VERSION).tar.gz
 LIBSERIAL.URL=https://github.com/crayzeewulf/libserial/archive/$(LIBSERIAL.ARCHIVE)
 LIBSERIAL.DIR=$(DOWNLOADS.DIR)/libserial-$(LIBSERIAL.VERSION)
 LIBSERIAL.BUILD=$(DOWNLOADS.DIR)/build.libserial
-BOOST.DIR=$(DOWNLOADS.DIR)/boost
+BOOST.DIR=$(DOWNLOADS.DIR)/boost_1_65_1
 BOOST.ARCHIVE=boost_1_65_1.tar.bz2
 BOOST.URL="https://s3.amazonaws.com/buildroot-sources/boost_1_65_1.tar.bz2"
+EXAMPLES.DIR=$(BASE.DIR)/examples
+EXAMPLES.BUILD=$(BASE.DIR)/build.examples
 
 boost.clean: .FORCE
 	rm -rf $(BOOST.DIR)
@@ -66,27 +69,14 @@ socat: .FORCE
 	socat -d pty,raw,echo=0 -d pty,raw,echo=0
 
 examples.clean: .FORCE
-	rm -rf $(TESTS.BUILD)
+	rm -rf $(EXAMPLES.BUILD)
 
 examples.build: examples.clean
-	mkdir -p $(TESTS.BUILD)
-	cd $(TESTS.BUILD) && $(CMAKE.BIN) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) && make install
+	mkdir -p $(EXAMPLES.BUILD)
+	cd $(EXAMPLES.BUILD) && $(CMAKE.BIN) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(EXAMPLES.DIR) && make -j$(J) && make install
 
 examples.run: .FORCE
-	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(TESTS.BIN)
-
-tests: protocol tests.build tests.run
-
-
-tests.debug: .FORCE
-ifeq ($(OS), Linux)
-	cd $(TESTS.BUILD) && LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib gdb $(INSTALLED.HOST.DIR)/bin/test
-endif
-
-ifeq ($(OS), Darwin)
-	cd $(TESTS.BUILD) && LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib lldb $(INSTALLED.HOST.DIR)/bin/test
-endif
-
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(EXAMPLE.BIN)
 
 gtest.fetch: .FORCE
 	cd $(DOWNLOADS.DIR) && wget $(GTEST.URL) && tar xf $(GTEST.ARCHIVE)
