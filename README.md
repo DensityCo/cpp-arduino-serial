@@ -15,11 +15,16 @@ Implementations are available in various programming languages:
 - [C++](https://github.com/araffin/cpp-arduino-serial)
 - [Rust](https://github.com/araffin/rust-arduino-serial)
 
-## Dependency
+## Dependencies Linux (Ubuntu 18.04)
 
 Dependency (libserial):
 ```
-sudo apt-get install libserial-dev
+sudo apt-get install build-essential git doxygen
+```
+
+## Dependencies MacOS
+```
+brew install doxygen git
 ```
 
 ## Examples

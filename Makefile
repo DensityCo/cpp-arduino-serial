@@ -1,7 +1,7 @@
 HASH := $(shell git rev-parse --short=10 HEAD)
 OS := $(shell uname)
 ARCH := $(shell uname -m)
-J=8
+J=12
 BASE.DIR=$(PWD)
 PACKAGE.DIR=$(BASE.DIR)/package
 DOWNLOADS.DIR=$(BASE.DIR)/downloads
@@ -26,6 +26,18 @@ LIBSERIAL.ARCHIVE=v$(LIBSERIAL.VERSION).tar.gz
 LIBSERIAL.URL=https://github.com/crayzeewulf/libserial/archive/$(LIBSERIAL.ARCHIVE)
 LIBSERIAL.DIR=$(DOWNLOADS.DIR)/libserial-$(LIBSERIAL.VERSION)
 LIBSERIAL.BUILD=$(DOWNLOADS.DIR)/build.libserial
+BOOST.DIR=$(DOWNLOADS.DIR)/boost
+BOOST.ARCHIVE=boost_1_65_1.tar.bz2
+BOOST.URL="https://s3.amazonaws.com/buildroot-sources/boost_1_65_1.tar.bz2"
+
+boost.clean: .FORCE
+	rm -rf $(BOOST.DIR)
+	rm -f $(DOWNLOADS.DIR)/$(BOOST.ARCHIVE)
+
+boost: boost.clean
+	mkdir -p $(BOOST.DIR)
+	cd $(DOWNLOADS.DIR) && wget $(BOOST.URL)	
+	cd $(DOWNLOADS.DIR) && tar xf $(BOOST.ARCHIVE) && cd $(BOOST.DIR) && ./bootstrap.sh --prefix=$(INSTALLED.HOST.DIR) && ./b2 stage threading=multi link=shared && ./b2 install threading=multi link=shared
 
 libserial: libserial.clean
 	mkdir -p $(DOWNLOADS.DIR)
@@ -45,7 +57,7 @@ robustserial: robustserial.clean
 robustserial.clean: .FORCE
 	rm -rf $(ROBUSTSERIAL.BUILD)
 
-bootstrap: cmake gtest
+bootstrap: cmake gtest boost libserial
 
 ctags: .FORCE
 	ctags -R --exclude=.git --exclude=installed.host --exclude=installed.target  --exclude=downloads --exclude=documents --exclude=build.* --exclude=$(TOOLCHAIN.NAME) .
@@ -53,14 +65,14 @@ ctags: .FORCE
 socat: .FORCE
 	socat -d pty,raw,echo=0 -d pty,raw,echo=0
 
-tests.clean: .FORCE
+examples.clean: .FORCE
 	rm -rf $(TESTS.BUILD)
 
-tests.build: tests.clean
+examples.build: examples.clean
 	mkdir -p $(TESTS.BUILD)
 	cd $(TESTS.BUILD) && $(CMAKE.BIN) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) && make install
 
-tests.run: .FORCE
+examples.run: .FORCE
 	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(TESTS.BIN)
 
 tests: protocol tests.build tests.run
@@ -106,7 +118,7 @@ clean: cmake.clean tests.clean
 	rm -rf $(PACKAGE.DIR)
 	rm -f $(BASE.DIR)/tags
 
-ci: bootstrap tests
+ci: bootstrap robustserial
 
 .FORCE:
 
